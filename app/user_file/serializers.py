@@ -41,16 +41,22 @@ class User_FileSerializer(serializers.ModelSerializer):
         read_only_Fields = ('id',)
 
 
-# class UserFileDetailSerializer(User_FileSerializer):
-#     """serialize a user_file detail"""
-#     file_types = File_typeSerializer(many=True, read_only=True)
-#     tags = TagSerializer(many=True, read_only=True)
-#
-#
-# class UserFile_FilesSerializer(serializers.ModelSerializer):
-#     """serializer for uploading files to userfiles"""
-#
-#     class Meta:
-#         model = User_File
-#         fields = ('id', 'file')
-#         read_only_Fields = ('id')
+class UserFileDetailSerializer(User_FileSerializer):
+    """serialize a user_file detail"""
+    class Meta:
+        model = User_File
+        fields = (
+            'file_types', 'tags'
+        )
+        read_only_Fields = ('id',)
+ #    file_types = File_typeSerializer(many=True, read_only=True)
+ #    tags = TagSerializer(many=True, read_only=True)
+
+
+class UserFile_FilesSerializer(serializers.ModelSerializer):
+    """serializer for uploading files to userfiles"""
+
+    class Meta:
+        model = User_File
+        fields = ('id', 'file')
+        read_only_Fields = ('id')

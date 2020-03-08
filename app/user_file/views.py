@@ -4,26 +4,26 @@ from rest_framework.response import Response
 from rest_framework import viewsets, mixins, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.filters import SearchFilter, OrderingFilter
 from core.models import User_File
 
 from user_file import serializers
 
 
-# class BaseFilesAttrViewSet(viewsets.GenericViewSet,
-#                            mixins.ListModelMixin,
-#                            mixins.CreateModelMixin):
-#     """base viewsets for user owned files attributes"""
-#     authentication_classes = (TokenAuthentication,)
-#     permissions_classes = (IsAuthenticated,)
-#
-#     def get_queryset(self):
-#         return self.queryset.filter(user=self.request.user).order_by('-name')
-#         """return objects for the current authenticated user only"""
-#
-#     def perform_create(self, serializer):
-#         """create a new object"""
-#         serializer.save(user=self.request.user)
+class BaseFilesAttrViewSet(viewsets.GenericViewSet,
+                           mixins.ListModelMixin,
+                           mixins.CreateModelMixin):
+    """base viewsets for user owned files attributes"""
+    authentication_classes = (TokenAuthentication,)
+    permissions_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user).order_by('-name')
+        """return objects for the current authenticated user only"""
+
+    def perform_create(self, serializer):
+        """create a new object"""
+        serializer.save(user=self.request.user)
 
 
 # class TagViewSet(viewsets.GenericViewSet,
@@ -80,7 +80,9 @@ class User_FileViewSet(viewsets.ModelViewSet):
     queryset = User_File.objects.all()
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-
+    filter_backends = (SearchFilter, OrderingFilter)
+    # http://127.0.0.1:8000/api/user_files/user_file/?search=kitchen&ordering=date_updated
+    search_fields = ('title', 'file_types', 'tags')
     # def _params_to_ints(self, qs):
     #     """convert a list of string ids to a list of integers"""
     #     # our_string = '1,2,3'
@@ -118,31 +120,31 @@ class User_FileViewSet(viewsets.ModelViewSet):
         """Return appropriate serializer class"""
         if self.action == 'retrieve':
             return serializers.UserFileDetailSerializer
-        # elif self.action == 'upload_file':
-        #     return serializers.UserFile_FilesSerializer
+        elif self.action == 'upload_file':
+            return serializers.UserFile_FilesSerializer
         return self.serializer_class
 
     def perform_create(self, serializer):
         """create a new user user_File"""
         serializer.save(user=self.request.user)
 
-    # @action(methods=['POST', 'GET'], detail=True, url_path='upload-file')
-    # def upload_file(self, request, pk=None):
-    #     """upload an file/image to a userfile"""
-    #     user_file = self.get_object()
-    #     serializer = self.get_serializer(
-    #         user_file,
-    #         data=request.data
-    #     )
-    #
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(
-    #             serializer.data,
-    #             status=status.HTTP_200_OK
-    #         )
-    #
-    #     return Response(
-    #         serializer.errors,
-    #         status=status.HTTP_400_BAD_REQUEST
-    #     )
+    @action(methods=['POST', 'GET'], detail=True, url_path='upload-file')
+    def upload_file(self, request, pk=None):
+        """upload an file/image to a userfile"""
+        user_file = self.get_object()
+        serializer = self.get_serializer(
+            user_file,
+            data=request.data
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
