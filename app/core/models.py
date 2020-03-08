@@ -8,13 +8,14 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
 from django.conf import settings
 
 
-# def userfile_file_path(instance, filename):
-#     """generate file_path for new userfile file"""
-#     ext = filename.split('.')[-1]
-#     filename = f'{uuid.uuid4()}.{ext}'
-#
-#     return os.path.join('uploads/user_files', filename)
-#
+def userfile_file_path(instance, filename):
+    """generate file_path for new userfile file"""
+    ext = filename.split('.')[-1]
+    # ADD CHANGEES HERE
+    filename = f'{uuid.uuid4()}.{ext}'
+
+    return os.path.join('uploads/user_files', filename)
+
 
 class UserManager(BaseUserManager):
 
@@ -89,3 +90,31 @@ class User(AbstractBaseUser, PermissionsMixin):
 #
 #     def __str__(self):
 #         return self.title
+
+
+class User_File(models.Model):
+    """user_files object"""
+    FILE_TYPE = (
+        ('R12', 'DXF R12'),
+        ('R13', 'DXF R13'),
+        ('R14', 'DXF R14'),
+        ('R2000', 'DXF R2000'),
+        ('R2004', 'DXF R2004'),
+        ('R2007', 'DXF R2007'),
+        ('R2010', 'DXF R2010'),
+        ('R2013', 'DXF R2013'),
+        ('R2018', 'DXF R2018'),
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    title = models.CharField(max_length=255)
+    created_on = models.DateTimeField(auto_now_add=True)
+    link = models.CharField(max_length=255, blank=True)
+    file_types = models.CharField(max_length=14, choices=FILE_TYPE)
+    tags = models.CharField(max_length=255, blank=True)
+    file = models.FileField(null=True, upload_to=userfile_file_path)
+
+    def __str__(self):
+        return self.title

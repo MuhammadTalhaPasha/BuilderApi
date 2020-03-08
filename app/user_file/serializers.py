@@ -1,0 +1,56 @@
+from rest_framework import serializers
+
+from core.models import User_File
+
+
+# class TagSerializer(serializers.ModelSerializer):
+#     """Serializer for tag object"""
+#
+#     class Meta:
+#         model = Tag
+#         fields = ('id', 'name')
+#         read_only_Fields = ('id',)
+#
+#
+# class File_typeSerializer(serializers.ModelSerializer):
+#     """serailizer for file_type objects"""
+#
+#     class Meta:
+#         model = File_type
+#         fields = ('id', 'type')
+#         read_only_Fields = ('id',)
+
+
+class User_FileSerializer(serializers.ModelSerializer):
+    """serialize uesr files"""
+    # file_types = serializers.PrimaryKeyRelatedField(
+    #     many=True,
+    #     queryset=File_type.objects.all()
+    # )
+    # tags = serializers.PrimaryKeyRelatedField(
+    #     many=True,
+    #     queryset=Tag.objects.all()
+    # )
+
+    class Meta:
+        model = User_File
+        fields = (
+            'id', 'title',
+            'file_types', 'tags', 'created_on', 'link'
+        )
+        read_only_Fields = ('id',)
+
+
+# class UserFileDetailSerializer(User_FileSerializer):
+#     """serialize a user_file detail"""
+#     file_types = File_typeSerializer(many=True, read_only=True)
+#     tags = TagSerializer(many=True, read_only=True)
+#
+#
+# class UserFile_FilesSerializer(serializers.ModelSerializer):
+#     """serializer for uploading files to userfiles"""
+#
+#     class Meta:
+#         model = User_File
+#         fields = ('id', 'file')
+#         read_only_Fields = ('id')

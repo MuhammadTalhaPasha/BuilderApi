@@ -65,7 +65,6 @@ class ModelTests(TestCase):
     #     )
     #
     #     self.assertEqual(str(file_type), file_type.type)
-    #
     # def test_uesr_file_str(self):
     #     """tests the user_files string representation"""
     #     user_file = models.User_File.objects.create(
@@ -75,7 +74,7 @@ class ModelTests(TestCase):
     #     )
     #
     #     self.assertEqual(str(user_file), user_file.title)
-    #
+
     # @patch('uuid.uuid4')
     # def test_userfile_file_name_uuid(self, mock_uuid):
     #     """Test that image/file is saved in the correct location"""
