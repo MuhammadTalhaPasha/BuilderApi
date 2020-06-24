@@ -1,14 +1,19 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.decorators import parser_classes
+import requests
+
 
 from rest_framework import viewsets, mixins, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter, OrderingFilter
 from core.models import User_File
-
+import ezdxf
+from ezdxf.groupby import groupby
 from user_file import serializers
 
+foo = []
 
 class BaseFilesAttrViewSet(viewsets.GenericViewSet,
                            mixins.ListModelMixin,
@@ -72,7 +77,8 @@ class BaseFilesAttrViewSet(viewsets.GenericViewSet,
 #         """create a new file_Type"""
 #         serializer.save(user=self.request.user)
 #
-
+# foo = []
+dim = []
 class User_FileViewSet(viewsets.ModelViewSet):
     """manage user_files in database"""
 
@@ -122,11 +128,23 @@ class User_FileViewSet(viewsets.ModelViewSet):
             return serializers.UserFileDetailSerializer
         elif self.action == 'upload_file':
             return serializers.UserFile_FilesSerializer
+        elif self.action == 'get_file':
+            return serializers.UserFile_FilesSerializer
         return self.serializer_class
 
     def perform_create(self, serializer):
         """create a new user user_File"""
         serializer.save(user=self.request.user)
+
+    # some shady ass stuff happening here dont look
+    def layer_and_color_key(self, entity):
+        if entity.dxf.layer == 'Wall':  # exclude entities from default layer '0'
+            item = {"line on layer": entity.dxf.layer, "start point": entity.dxf.start, "end point": entity.dxf.end}
+            foo.append(item)
+            return entity.dxf.layer, entity.dxf.color
+        else:
+            return None
+
 
     @action(methods=['POST', 'GET'], detail=True, url_path='upload-file')
     def upload_file(self, request, pk=None):
@@ -136,11 +154,36 @@ class User_FileViewSet(viewsets.ModelViewSet):
             user_file,
             data=request.data
         )
-
         if serializer.is_valid():
             serializer.save()
+            print(serializer.data)
+            print(serializer.data['file'])
+            url = serializer.data['file']
+            x = url.split("/",6)
+            file_name = x[6]
+            print(file_name)
+        # some more shady stuff about to happen look away
+            # doc = ezdxf.readfile(f'/home/talha/My_Work/django/BuilderApi/app/media/uploads/user_files/{file_name}')
+            doc = ezdxf.readfile(f"media/uploads/user_files/{file_name}")
+            msp = doc.modelspace()
+            group = groupby(entities=msp, dxfattrib='layer')
+            counter = 0
+            group = msp.groupby(dxfattrib='layer')
+            group = msp.groupby(key=self.layer_and_color_key)
+            temp = 0
+            for x in foo:
+                dic = {"layer": temp, "start-X": x['start point'][0], "end-X": x['end point'][0],
+                       "start-Y": x['start point'][1], "end-Y": x['end point'][1], "start-Z": x['start point'][2],
+                       "end-Z": x['end point'][2]}
+                temp += 1
+                dim.append(dic)
+            print("THIS IS FOOO-----------------------------------------------------")
+            print(foo)
+            print("THIS IS DIM======================================================")
+            print(dim)
+
             return Response(
-                serializer.data,
+                dim,
                 status=status.HTTP_200_OK
             )
 
