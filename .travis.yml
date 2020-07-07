@@ -1,4 +1,4 @@
-language: python
+-clanguage: python
 python:
    - "3.6"
 

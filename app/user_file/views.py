@@ -77,7 +77,6 @@ class BaseFilesAttrViewSet(viewsets.GenericViewSet,
 #         """create a new file_Type"""
 #         serializer.save(user=self.request.user)
 #
-# foo = []
 dim = []
 class User_FileViewSet(viewsets.ModelViewSet):
     """manage user_files in database"""
@@ -154,40 +153,93 @@ class User_FileViewSet(viewsets.ModelViewSet):
             user_file,
             data=request.data
         )
-        if serializer.is_valid():
-            serializer.save()
-            print(serializer.data)
-            print(serializer.data['file'])
-            url = serializer.data['file']
-            x = url.split("/",6)
-            file_name = x[6]
-            print(file_name)
-        # some more shady stuff about to happen look away
-            # doc = ezdxf.readfile(f'/home/talha/My_Work/django/BuilderApi/app/media/uploads/user_files/{file_name}')
-            doc = ezdxf.readfile(f"media/uploads/user_files/{file_name}")
-            msp = doc.modelspace()
-            group = groupby(entities=msp, dxfattrib='layer')
-            counter = 0
-            group = msp.groupby(dxfattrib='layer')
-            group = msp.groupby(key=self.layer_and_color_key)
-            temp = 0
-            for x in foo:
-                dic = {"layer": temp, "start-X": x['start point'][0], "end-X": x['end point'][0],
-                       "start-Y": x['start point'][1], "end-Y": x['end point'][1], "start-Z": x['start point'][2],
-                       "end-Z": x['end point'][2]}
-                temp += 1
-                dim.append(dic)
-            print("THIS IS FOOO-----------------------------------------------------")
+        if request.method == 'GET':
+            if serializer.is_valid():
+                serializer.save()
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_200_OK
+                )
+        elif request.method == 'POST':
+            global foo, dim
+            print("-------------------------this is global foo-----------------------------------")
             print(foo)
-            print("THIS IS DIM======================================================")
+            print("-------------------------this is global dim-----------------------------------")
             print(dim)
-
+            foo[:] = []
+            dim[:] = []
+            if serializer.is_valid():
+                serializer.save()
+                print(serializer.data)
+                print(serializer.data['file'])
+                url = serializer.data['file']
+                x = url.split("/",6)
+                file_name = x[6]
+                print(file_name)
+            # some more shady stuff about to happen look away
+                # doc = ezdxf.readfile(f'/home/talha/My_Work/django/BuilderApi/app/media/uploads/user_files/{file_name}')
+                doc = ezdxf.readfile(f"media/uploads/user_files/{file_name}")
+                msp = doc.modelspace()
+                group = groupby(entities=msp, dxfattrib='layer')
+                counter = 0
+                group = msp.groupby(dxfattrib='layer')
+                group = msp.groupby(key=self.layer_and_color_key)
+                temp = 0
+                for x in foo:
+                    dic = {"layer": temp, "start-X": x['start point'][0], "end-X": x['end point'][0],
+                           "start-Y": x['start point'][1], "end-Y": x['end point'][1], "start-Z": x['start point'][2],
+                           "end-Z": x['end point'][2]}
+                    temp += 1
+                    dim.append(dic)
+                print("THIS IS FOOO-----------------------------------------------------")
+                print(foo)
+                print("THIS IS DIM======================================================")
+                print(dim)
+                return Response(
+                    dim,
+                    status=status.HTTP_201_CREATED
+                )
+        else:
             return Response(
-                dim,
-                status=status.HTTP_200_OK
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        # if serializer.is_valid():
+        #     serializer.save()
+        #     print(serializer.data)
+        #     print(serializer.data['file'])
+        #     url = serializer.data['file']
+        #     x = url.split("/",6)
+        #     file_name = x[6]
+        #     print(file_name)
+        # # some more shady stuff about to happen look away
+        #     # doc = ezdxf.readfile(f'/home/talha/My_Work/django/BuilderApi/app/media/uploads/user_files/{file_name}')
+        #     doc = ezdxf.readfile(f"media/uploads/user_files/{file_name}")
+        #     msp = doc.modelspace()
+        #     group = groupby(entities=msp, dxfattrib='layer')
+        #     counter = 0
+        #     group = msp.groupby(dxfattrib='layer')
+        #     group = msp.groupby(key=self.layer_and_color_key)
+        #
+        #     temp = 0
+        #     for x in foo:
+        #         dic = {"layer": temp, "start-X": x['start point'][0], "end-X": x['end point'][0],
+        #                "start-Y": x['start point'][1], "end-Y": x['end point'][1], "start-Z": x['start point'][2],
+        #                "end-Z": x['end point'][2]}
+        #         temp += 1
+        #         dim.append(dic)
+        #     print("THIS IS FOOO-----------------------------------------------------")
+        #     print(foo)
+        #     print("THIS IS DIM======================================================")
+        #     print(dim)
+        #
+        #     return Response(
+        #         dim,
+        #         status=status.HTTP_200_OK
+        #     )
+        #
+        # return Response(
+        #     serializer.errors,
+        #     status=status.HTTP_400_BAD_REQUEST
+        # )
