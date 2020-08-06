@@ -23,6 +23,6 @@ urlpatterns = [
     path('api/user/', include('user.urls')),
     path('api/user_files/', include('user_file.urls')),
 ]
-#+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# +static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
   urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
